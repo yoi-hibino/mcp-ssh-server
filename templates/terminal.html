@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}MCP SSH Terminal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Terminal - {{ connection_id }}</h5>
+        <a href="{{ url_for('disconnect', connection_id=connection_id) }}" class="btn btn-sm btn-danger">Disconnect</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="terminal-container" id="terminal-output">
+            Welcome to MCP SSH Terminal
+            Connected to {{ connection_id }}
+            Type 'exit' to close the connection.
+            
+        </div>
+        <div class="p-2">
+            <input type="text" class="terminal-input" id="terminal-input" placeholder="Enter command...">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalInput = document.getElementById('terminal-input');
+        const connectionId = "{{ connection_id }}";
+        
+        // Scroll to bottom of terminal
+        function scrollToBottom() {
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+        
+        // Execute command
+        function executeCommand(command) {
+            // Add command to output
+            terminalOutput.innerHTML += `\n$ ${command}\n`;
+            scrollToBottom();
+            
+            // Exit command
+            if (command.trim().toLowerCase() === 'exit') {
+                window.location.href = "{{ url_for('disconnect', connection_id=connection_id) }}";
+                return;
+            }
+            
+            // Clear command
+            if (command.trim().toLowerCase() === 'clear') {
+                terminalOutput.innerHTML = '';
+                return;
+            }
+            
+            // Send command to server
+            const formData = new FormData();
+            formData.append('connection_id', connectionId);
+            formData.append('command', command);
+            
+            fetch('{{ url_for("execute_command") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    terminalOutput.innerHTML += `Error: ${data.error}\n`;
+                } else {
+                    if (data.stdout) {
+                        terminalOutput.innerHTML += data.stdout;
+                    }
+                    if (data.stderr) {
+                        terminalOutput.innerHTML += `Error: ${data.stderr}\n`;
+                    }
+                }
+                scrollToBottom();
+            })
+            .catch(error => {
+                terminalOutput.innerHTML += `Connection error: ${error.message}\n`;
+                scrollToBottom();
+            });
+        }
+        
+        // Input event handler
+        terminalInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const command = terminalInput.value;
+                terminalInput.value = '';
+                
+                if (command.trim()) {
+                    executeCommand(command);
+                }
+            }
+        });
+        
+        // Auto focus input
+        terminalInput.focus();
+        
+        // Keep focus on input when clicking terminal
+        terminalOutput.addEventListener('click', function() {
+            terminalInput.focus();
+        });
+        
+        // Welcome message
+        scrollToBottom();
+    });
+</script>
+{% endblock %}

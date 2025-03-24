@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}MCP SSH Server - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Connect to SSH Server</h5>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                
+                {% if auto_connection %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    Auto-connected to {{ auto_connection }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                
+                <form action="{{ url_for('connect') }}" method="post">
+                    <div class="mb-3">
+                        <label for="hostname" class="form-label">Hostname or IP</label>
+                        <input type="text" class="form-control" id="hostname" name="hostname" value="{{ default_host|default('') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="port" class="form-label">Port</label>
+                        <input type="number" class="form-control" id="port" name="port" value="{{ default_port|default('22') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ default_username|default('') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                        <div class="form-text">Leave blank if using key authentication</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="key_path" class="form-label">Private Key Path</label>
+                        <input type="text" class="form-control" id="key_path" name="key_path" value="{{ default_key_path|default('') }}" placeholder="e.g., ~/.ssh/id_rsa">
+                        <div class="form-text">Leave blank if using password authentication</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="save" name="save">
+                        <label class="form-check-label" for="save">Save connection</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Connect</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Saved Connections</h5>
+            </div>
+            <div class="card-body">
+                {% if connections %}
+                    {% for connection in connections %}
+                    <div class="card connection-card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ connection.username }}@{{ connection.hostname }}</h5>
+                            <p class="card-text">
+                                <strong>Port:</strong> {{ connection.port or 22 }}<br>
+                                {% if connection.key_path %}
+                                <strong>Key:</strong> {{ connection.key_path }}
+                                {% endif %}
+                            </p>
+                            <form action="{{ url_for('connect') }}" method="post">
+                                <input type="hidden" name="hostname" value="{{ connection.hostname }}">
+                                <input type="hidden" name="port" value="{{ connection.port or 22 }}">
+                                <input type="hidden" name="username" value="{{ connection.username }}">
+                                {% if connection.key_path %}
+                                <input type="hidden" name="key_path" value="{{ connection.key_path }}">
+                                {% endif %}
+                                <button type="submit" class="btn btn-sm btn-success">Connect</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No saved connections yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
