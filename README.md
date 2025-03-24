@@ -1,64 +1,88 @@
-# MCP SSH Server
+# MCP SSH Server for Windsurf
 
-A web-based SSH client that allows you to connect to remote servers through a browser interface.
+A Model Context Protocol (MCP) compatible SSH server designed for seamless integration with Windsurf IDE.
 
 ## Features
 
-- Connect to remote servers via SSH using password or key-based authentication
-- Save and manage connection details for quick access
-- Web-based terminal interface
-- Secure connection handling
+- Full MCP protocol support for SSH operations
+- Auto-connect to predefined SSH servers
+- Interactive terminal interface for SSH sessions
+- Support for both password and key-based authentication
+- Compatible with Windsurf IDE through MCP integration
 
-## Prerequisites
+## Setup and Installation
 
-- Python 3.7+
-- Flask for the web server
-- Paramiko for SSH connections
-- PyYAML for configuration management
+### Requirements
 
-## Installation
+```
+python >= 3.7
+flask
+paramiko
+```
+
+### Installation
 
 1. Clone the repository:
-```
-git clone <repository-url>
-cd MCP
+```bash
+git clone https://github.com/yoi-hibino/mcp-ssh-server.git
+cd mcp-ssh-server
 ```
 
-2. Install the required dependencies:
-```
+2. Install dependencies:
+```bash
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables (optional):
-```
-# Create .env file
-echo "SECRET_KEY=your_secret_key_here" > .env
+### Configuration
+
+Configure your SSH connection settings in the Windsurf MCP configuration file:
+
+```json
+{
+  "mcpServers": {
+    "ssh": {
+      "command": "python3",
+      "args": [
+        "/path/to/app.py"
+      ],
+      "cwd": "/path/to/mcp-ssh-server",
+      "protocol": "http",
+      "host": "localhost",
+      "port": 5050,
+      "env": {
+        "SSH_DEFAULT_HOST": "your_hostname",
+        "SSH_DEFAULT_PORT": "22",
+        "SSH_DEFAULT_USERNAME": "your_username",
+        "SSH_DEFAULT_PASSWORD": "your_password"
+      }
+    }
+  }
+}
 ```
 
-## Usage
+## MCP Endpoints
 
-1. Start the server:
-```
+The server implements the following MCP protocol endpoints:
+
+- `/alive` - Server health check
+- `/list_sessions` - List active SSH connections
+- `/mcp/status` - Check MCP server status
+- `/mcp/connect` - Connect to SSH server
+- `/mcp/execute` - Execute commands on SSH server
+- `/mcp/disconnect` - Disconnect from SSH server
+- `/ssh/capabilities` - List SSH server capabilities
+- `/ssh/sessions` - List active SSH sessions
+
+## Running the Server
+
+Start the server by running:
+
+```bash
 python app.py
 ```
 
-2. Open your web browser and navigate to:
-```
-http://localhost:5000
-```
+This will start the server on port 5050. You can access the web interface at http://localhost:5050/
 
-3. Enter your SSH connection details and connect to a remote server.
+## Integration with Windsurf
 
-## Configuration
-
-The application stores saved connections in `~/.mcp/connections.yaml`. This file is automatically created on first run.
-
-## Security Notes
-
-- For production use, make sure to set a strong SECRET_KEY in the .env file
-- SSH passwords are not stored in the configuration file, only connection details
-- Consider using key-based authentication instead of passwords for better security
-
-## License
-
-MIT
+Configure Windsurf to use this MCP server by adding the appropriate configuration to your Windsurf MCP settings file.
