@@ -10,6 +10,16 @@ A Model Context Protocol (MCP) compatible SSH server designed for seamless integ
 - Support for both password and key-based authentication
 - Compatible with Windsurf IDE through MCP integration
 
+## Troubleshooting Common Issues
+
+### Windsurf Settings Page Error
+
+If you encounter an error message in the Windsurf Settings page showing "Error: request failed. Check your configuration." as shown in the image below, this server implementation provides the necessary MCP protocol endpoints to resolve this issue.
+
+![Windsurf Settings Error Message](./image/error_message.png)
+
+This error typically appears when Windsurf cannot properly communicate with the MCP SSH server due to missing endpoints or protocol compatibility issues. The implementation in this repository includes all the necessary endpoints required for proper integration with Windsurf.
+
 ## Setup and Installation
 
 ### Requirements
@@ -86,3 +96,9 @@ This will start the server on port 5050. You can access the web interface at htt
 ## Integration with Windsurf
 
 Configure Windsurf to use this MCP server by adding the appropriate configuration to your Windsurf MCP settings file.
+
+After configuring, if you still encounter the error shown above, try these steps:
+1. Restart the MCP SSH server
+2. Completely restart the Windsurf application
+3. Verify the server is running and accessible at http://localhost:5050/
+4. Check that all MCP endpoints are responding correctly
